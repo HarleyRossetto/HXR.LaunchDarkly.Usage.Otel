@@ -5,10 +5,10 @@ public sealed record RawUsageSeries(
     IReadOnlyList<IReadOnlyDictionary<string, object?>> Metadata,
     IReadOnlyList<IReadOnlyDictionary<string, object?>> Series);
 
-/// <summary>Service-connection connection-minutes for one group during the hour starting at <see cref="HourUtc"/>.</summary>
+/// <summary>Service-connection value for one group during the hour starting at <see cref="HourUtc"/>.</summary>
 public sealed record HourlyUsagePoint(
     DateTimeOffset HourUtc,
-    double Minutes,
+    double Value,
     IReadOnlyDictionary<string, string> Attributes);
 
 public sealed record IngestionResult(

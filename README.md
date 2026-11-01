@@ -29,7 +29,7 @@ app.MapLaunchDarklyUsageBackfill().RequireAuthorization();                // opt
 
 ## Behaviour
 
-- Metric `launchdarkly.service_connections` (gauge, unit `{service_connection}`): the hour's connection-minutes from LaunchDarkly divided by `MinutesPerServiceConnection` (43,800, one SDK connected for a month). Summing over a month gives the billed service connections; multiply a single hour by 730 for the average number of concurrent connections, timestamped at the **start of each usage hour**, so re-publishing an hour is idempotent.
+- Metric `launchdarkly.service_connections` (gauge): the raw hourly value from the API, untransformed, timestamped at the **start of each usage hour**, so re-publishing an hour is idempotent. Note that backends such as Prometheus keep the first value for a given series and timestamp, so changing a value later requires a new metric name or clearing stored data.
 - The .NET Metrics SDK can't emit historical timestamps, so metrics are pushed directly as OTLP/HTTP JSON.
 - State is optional: `IUsageWatermarkStore` (in-memory by default) tracks the last published hour. After a restart the lookback window is re-scraped. Register your own store to persist it.
 - Failed runs don't advance the watermark; the next tick retries.

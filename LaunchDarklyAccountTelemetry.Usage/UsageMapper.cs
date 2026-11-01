@@ -44,13 +44,13 @@ internal static class UsageMapper
                     continue;
                 }
 
-                if (ToDouble(value) is not { } minutes)
+                if (ToDouble(value) is not { } usage)
                 {
                     continue;
                 }
 
                 var attributes = index < groups.Count ? groups[index] : new Dictionary<string, string>();
-                points.Add(new HourlyUsagePoint(hour, minutes, attributes));
+                points.Add(new HourlyUsagePoint(hour, usage, attributes));
             }
         }
 

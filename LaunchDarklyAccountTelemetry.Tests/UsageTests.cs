@@ -108,7 +108,7 @@ public class UsageMapperTests
         Assert.Equal(3, points.Count);
         var first = points[0];
         Assert.Equal(DateTimeOffset.Parse("2026-01-01T00:00:00Z"), first.HourUtc);
-        Assert.Equal(60, first.Minutes);
+        Assert.Equal(60, first.Value);
         Assert.Equal("e1", first.Attributes["launchdarkly.environment.id"]);
         Assert.Equal("staging", first.Attributes["launchdarkly.environment.key"]);
         Assert.Equal("Staging", first.Attributes["launchdarkly.environment.name"]);
@@ -134,7 +134,7 @@ public class OtlpPublisherTests
         var dp = metric.GetProperty("gauge").GetProperty("dataPoints")[0];
         Assert.Equal("launchdarkly.service_connections", metric.GetProperty("name").GetString());
         Assert.Equal("1767225600000000000", dp.GetProperty("timeUnixNano").GetString());
-        Assert.Equal(42 / 43_800d, dp.GetProperty("asDouble").GetDouble(), 12);
+        Assert.Equal(42, dp.GetProperty("asDouble").GetDouble());
     }
 
     [Theory]

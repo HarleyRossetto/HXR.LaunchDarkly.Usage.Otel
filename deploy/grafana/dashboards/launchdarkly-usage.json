@@ -39,8 +39,8 @@
     {
       "id": 1,
       "type": "timeseries",
-      "title": "Average concurrent SDK connections per hour",
-      "description": "Service connections accrued in the hour x 730 (43,800 min/month / 60 min/hour) = average number of server-side SDK connections held open that hour. Samples are stamped at the start of the usage hour.",
+      "title": "Service connections per hour (raw API value)",
+      "description": "Raw hourly values from the LaunchDarkly API; each sample is stamped at the start of its usage hour.",
       "gridPos": { "h": 10, "w": 24, "x": 0, "y": 0 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "interval": "1h",
@@ -57,14 +57,14 @@
           "refId": "A",
           "interval": "1h",
           "legendFormat": "{{launchdarkly_project_name}} / {{launchdarkly_environment_key}}",
-          "expr": "(sum by (launchdarkly_project_name, launchdarkly_environment_key) (last_over_time(launchdarkly_service_connections{launchdarkly_project_name=~\"$project\", launchdarkly_environment_key=~\"$environment\"}[1h]))) * 730"
+          "expr": "sum by (launchdarkly_project_name, launchdarkly_environment_key) (last_over_time(launchdarkly_service_connections{launchdarkly_project_name=~\"$project\", launchdarkly_environment_key=~\"$environment\"}[1h]))"
         }
       ]
     },
     {
       "id": 2,
       "type": "timeseries",
-      "title": "Hour-over-hour change in concurrent connections",
+      "title": "Hour-over-hour change",
       "gridPos": { "h": 8, "w": 14, "x": 0, "y": 10 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "interval": "1h",
@@ -75,14 +75,14 @@
           "refId": "A",
           "interval": "1h",
           "legendFormat": "{{launchdarkly_project_name}} / {{launchdarkly_environment_key}}",
-          "expr": "(sum by (launchdarkly_project_name, launchdarkly_environment_key) (last_over_time(launchdarkly_service_connections{launchdarkly_project_name=~\"$project\", launchdarkly_environment_key=~\"$environment\"}[1h])) - sum by (launchdarkly_project_name, launchdarkly_environment_key) (last_over_time(launchdarkly_service_connections{launchdarkly_project_name=~\"$project\", launchdarkly_environment_key=~\"$environment\"}[1h] offset 1h))) * 730"
+          "expr": "sum by (launchdarkly_project_name, launchdarkly_environment_key) (last_over_time(launchdarkly_service_connections{launchdarkly_project_name=~\"$project\", launchdarkly_environment_key=~\"$environment\"}[1h])) - sum by (launchdarkly_project_name, launchdarkly_environment_key) (last_over_time(launchdarkly_service_connections{launchdarkly_project_name=~\"$project\", launchdarkly_environment_key=~\"$environment\"}[1h] offset 1h))"
         }
       ]
     },
     {
       "id": 3,
       "type": "bargauge",
-      "title": "Service connections accrued in range",
+      "title": "Sum over range",
       "gridPos": { "h": 8, "w": 10, "x": 14, "y": 10 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": { "defaults": { "unit": "none", "decimals": 2, "color": { "mode": "continuous-GrYlRd" } }, "overrides": [] },
