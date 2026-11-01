@@ -37,6 +37,12 @@ public sealed class LaunchDarklyUsageOptions
 
     public TimeSpan MaxRateLimitWait { get; set; } = TimeSpan.FromSeconds(30);
 
+    /// <summary>
+    /// LaunchDarkly bills one service connection per 43,800 connection-minutes (one SDK connected for a month).
+    /// Published values are connection-minutes divided by this.
+    /// </summary>
+    public double MinutesPerServiceConnection { get; set; } = 43_800;
+
     public OtlpOptions Otlp { get; set; } = new();
 }
 
@@ -47,7 +53,7 @@ public sealed class OtlpOptions
 
     public Dictionary<string, string> Headers { get; set; } = new();
 
-    public string MetricName { get; set; } = "launchdarkly.service_connections.minutes";
+    public string MetricName { get; set; } = "launchdarkly.service_connections";
 
     public string ServiceName { get; set; } = "launchdarkly-account-usage";
 

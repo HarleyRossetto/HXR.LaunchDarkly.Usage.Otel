@@ -14,7 +14,7 @@
         "type": "query",
         "label": "Project",
         "datasource": { "type": "prometheus", "uid": "prometheus" },
-        "query": { "query": "label_values(launchdarkly_service_connections_minutes, launchdarkly_project_name)", "refId": "p" },
+        "query": { "query": "label_values(launchdarkly_service_connections, launchdarkly_project_name)", "refId": "p" },
         "refresh": 2,
         "includeAll": true,
         "multi": true,
@@ -26,7 +26,7 @@
         "type": "query",
         "label": "Environment",
         "datasource": { "type": "prometheus", "uid": "prometheus" },
-        "query": { "query": "label_values(launchdarkly_service_connections_minutes{launchdarkly_project_name=~\"$project\"}, launchdarkly_environment_key)", "refId": "e" },
+        "query": { "query": "label_values(launchdarkly_service_connections{launchdarkly_project_name=~\"$project\"}, launchdarkly_environment_key)", "refId": "e" },
         "refresh": 2,
         "includeAll": true,
         "multi": true,
@@ -39,14 +39,14 @@
     {
       "id": 1,
       "type": "timeseries",
-      "title": "Service connection minutes per hour",
-      "description": "Hourly values; each sample is stamped at the start of its usage hour.",
+      "title": "Average concurrent SDK connections per hour",
+      "description": "Service connections accrued in the hour x 730 (43,800 min/month / 60 min/hour) = average number of server-side SDK connections held open that hour. Samples are stamped at the start of the usage hour.",
       "gridPos": { "h": 10, "w": 24, "x": 0, "y": 0 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "interval": "1h",
       "fieldConfig": {
         "defaults": {
-          "unit": "m",
+          "unit": "none",
           "custom": { "drawStyle": "bars", "fillOpacity": 60, "stacking": { "mode": "normal" }, "lineWidth": 1 }
         },
         "overrides": []
@@ -57,42 +57,42 @@
           "refId": "A",
           "interval": "1h",
           "legendFormat": "{{launchdarkly_project_name}} / {{launchdarkly_environment_key}}",
-          "expr": "sum by (launchdarkly_project_name, launchdarkly_environment_key) (last_over_time(launchdarkly_service_connections_minutes{launchdarkly_project_name=~\"$project\", launchdarkly_environment_key=~\"$environment\"}[1h]))"
+          "expr": "(sum by (launchdarkly_project_name, launchdarkly_environment_key) (last_over_time(launchdarkly_service_connections{launchdarkly_project_name=~\"$project\", launchdarkly_environment_key=~\"$environment\"}[1h]))) * 730"
         }
       ]
     },
     {
       "id": 2,
       "type": "timeseries",
-      "title": "Hour-over-hour change",
+      "title": "Hour-over-hour change in concurrent connections",
       "gridPos": { "h": 8, "w": 14, "x": 0, "y": 10 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "interval": "1h",
-      "fieldConfig": { "defaults": { "unit": "m", "custom": { "drawStyle": "line", "lineWidth": 1, "fillOpacity": 10 } }, "overrides": [] },
+      "fieldConfig": { "defaults": { "unit": "none", "custom": { "drawStyle": "line", "lineWidth": 1, "fillOpacity": 10 } }, "overrides": [] },
       "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": [] }, "tooltip": { "mode": "multi" } },
       "targets": [
         {
           "refId": "A",
           "interval": "1h",
           "legendFormat": "{{launchdarkly_project_name}} / {{launchdarkly_environment_key}}",
-          "expr": "sum by (launchdarkly_project_name, launchdarkly_environment_key) (last_over_time(launchdarkly_service_connections_minutes{launchdarkly_project_name=~\"$project\", launchdarkly_environment_key=~\"$environment\"}[1h])) - sum by (launchdarkly_project_name, launchdarkly_environment_key) (last_over_time(launchdarkly_service_connections_minutes{launchdarkly_project_name=~\"$project\", launchdarkly_environment_key=~\"$environment\"}[1h] offset 1h))"
+          "expr": "(sum by (launchdarkly_project_name, launchdarkly_environment_key) (last_over_time(launchdarkly_service_connections{launchdarkly_project_name=~\"$project\", launchdarkly_environment_key=~\"$environment\"}[1h])) - sum by (launchdarkly_project_name, launchdarkly_environment_key) (last_over_time(launchdarkly_service_connections{launchdarkly_project_name=~\"$project\", launchdarkly_environment_key=~\"$environment\"}[1h] offset 1h))) * 730"
         }
       ]
     },
     {
       "id": 3,
       "type": "bargauge",
-      "title": "Total minutes in range",
+      "title": "Service connections accrued in range",
       "gridPos": { "h": 8, "w": 10, "x": 14, "y": 10 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "fieldConfig": { "defaults": { "unit": "m", "color": { "mode": "continuous-GrYlRd" } }, "overrides": [] },
+      "fieldConfig": { "defaults": { "unit": "none", "decimals": 2, "color": { "mode": "continuous-GrYlRd" } }, "overrides": [] },
       "options": { "orientation": "horizontal", "displayMode": "gradient", "reduceOptions": { "calcs": ["lastNotNull"], "values": false } },
       "targets": [
         {
           "refId": "A",
           "instant": true,
           "legendFormat": "{{launchdarkly_project_name}} / {{launchdarkly_environment_key}}",
-          "expr": "sort_desc(sum by (launchdarkly_project_name, launchdarkly_environment_key) (sum_over_time(launchdarkly_service_connections_minutes{launchdarkly_project_name=~\"$project\", launchdarkly_environment_key=~\"$environment\"}[$__range])))"
+          "expr": "sort_desc(sum by (launchdarkly_project_name, launchdarkly_environment_key) (sum_over_time(launchdarkly_service_connections{launchdarkly_project_name=~\"$project\", launchdarkly_environment_key=~\"$environment\"}[$__range])))"
         }
       ]
     },

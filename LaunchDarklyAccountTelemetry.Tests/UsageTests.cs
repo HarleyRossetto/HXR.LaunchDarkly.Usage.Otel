@@ -132,9 +132,9 @@ public class OtlpPublisherTests
         using var doc = JsonDocument.Parse(json);
         var metric = doc.RootElement.GetProperty("resourceMetrics")[0].GetProperty("scopeMetrics")[0].GetProperty("metrics")[0];
         var dp = metric.GetProperty("gauge").GetProperty("dataPoints")[0];
-        Assert.Equal("launchdarkly.service_connections.minutes", metric.GetProperty("name").GetString());
+        Assert.Equal("launchdarkly.service_connections", metric.GetProperty("name").GetString());
         Assert.Equal("1767225600000000000", dp.GetProperty("timeUnixNano").GetString());
-        Assert.Equal(42, dp.GetProperty("asDouble").GetDouble());
+        Assert.Equal(42 / 43_800d, dp.GetProperty("asDouble").GetDouble(), 12);
     }
 
     [Theory]

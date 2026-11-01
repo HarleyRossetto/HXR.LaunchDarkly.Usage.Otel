@@ -82,8 +82,8 @@ internal sealed class OtlpHttpMetricPublisher(HttpClient http, IOptions<LaunchDa
             w.WriteStartArray("metrics");
             w.WriteStartObject();
             w.WriteString("name", _options.Otlp.MetricName);
-            w.WriteString("description", "LaunchDarkly server-side service connection minutes per hour.");
-            w.WriteString("unit", "min");
+            w.WriteString("description", "Service connections accrued per usage hour (connection-minutes / MinutesPerServiceConnection). Summed over a month this is the billed amount.");
+            w.WriteString("unit", "{service_connection}");
             w.WriteStartObject("gauge");
             w.WriteStartArray("dataPoints");
             foreach (var p in points)
@@ -98,7 +98,7 @@ internal sealed class OtlpHttpMetricPublisher(HttpClient http, IOptions<LaunchDa
                 w.WriteEndArray();
                 // 64-bit ints are strings in OTLP JSON.
                 w.WriteString("timeUnixNano", (p.HourUtc.ToUnixTimeMilliseconds() * 1_000_000L).ToString(System.Globalization.CultureInfo.InvariantCulture));
-                w.WriteNumber("asDouble", p.Minutes);
+                w.WriteNumber("asDouble", p.Minutes / _options.MinutesPerServiceConnection);
                 w.WriteEndObject();
             }
 

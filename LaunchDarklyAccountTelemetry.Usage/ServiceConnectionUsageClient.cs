@@ -4,7 +4,7 @@ namespace LaunchDarklyAccountTelemetry.Usage;
 
 public interface IServiceConnectionUsageClient
 {
-    /// <summary>Fetches hourly incremental service-connection minutes for [from, to).</summary>
+    /// <summary>Fetches hourly incremental service-connection connection-minutes for [from, to).</summary>
     Task<RawUsageSeries> GetHourlyAsync(
         DateTimeOffset from,
         DateTimeOffset to,

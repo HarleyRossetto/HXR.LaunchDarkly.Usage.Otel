@@ -5,7 +5,7 @@ public sealed record RawUsageSeries(
     IReadOnlyList<IReadOnlyDictionary<string, object?>> Metadata,
     IReadOnlyList<IReadOnlyDictionary<string, object?>> Series);
 
-/// <summary>Service-connection minutes for one group during the hour starting at <see cref="HourUtc"/>.</summary>
+/// <summary>Service-connection connection-minutes for one group during the hour starting at <see cref="HourUtc"/>.</summary>
 public sealed record HourlyUsagePoint(
     DateTimeOffset HourUtc,
     double Minutes,
