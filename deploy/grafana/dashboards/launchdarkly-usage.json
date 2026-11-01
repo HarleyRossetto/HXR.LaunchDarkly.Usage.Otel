@@ -1,0 +1,146 @@
+{
+  "uid": "ld-service-connections",
+  "title": "LaunchDarkly service connections",
+  "tags": ["launchdarkly"],
+  "timezone": "utc",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "",
+  "time": { "from": "now-24h", "to": "now" },
+  "templating": {
+    "list": [
+      {
+        "name": "project",
+        "type": "query",
+        "label": "Project",
+        "datasource": { "type": "prometheus", "uid": "prometheus" },
+        "query": { "query": "label_values(launchdarkly_service_connections_minutes, launchdarkly_project_name)", "refId": "p" },
+        "refresh": 2,
+        "includeAll": true,
+        "multi": true,
+        "allValue": ".*",
+        "current": { "text": "All", "value": "$__all" }
+      },
+      {
+        "name": "environment",
+        "type": "query",
+        "label": "Environment",
+        "datasource": { "type": "prometheus", "uid": "prometheus" },
+        "query": { "query": "label_values(launchdarkly_service_connections_minutes{launchdarkly_project_name=~\"$project\"}, launchdarkly_environment_key)", "refId": "e" },
+        "refresh": 2,
+        "includeAll": true,
+        "multi": true,
+        "allValue": ".*",
+        "current": { "text": "All", "value": "$__all" }
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "timeseries",
+      "title": "Service connection minutes per hour",
+      "description": "Hourly values; each sample is stamped at the start of its usage hour.",
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "interval": "1h",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "m",
+          "custom": { "drawStyle": "bars", "fillOpacity": 60, "stacking": { "mode": "normal" }, "lineWidth": 1 }
+        },
+        "overrides": []
+      },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["sum"] }, "tooltip": { "mode": "multi" } },
+      "targets": [
+        {
+          "refId": "A",
+          "interval": "1h",
+          "legendFormat": "{{launchdarkly_project_name}} / {{launchdarkly_environment_key}}",
+          "expr": "sum by (launchdarkly_project_name, launchdarkly_environment_key) (last_over_time(launchdarkly_service_connections_minutes{launchdarkly_project_name=~\"$project\", launchdarkly_environment_key=~\"$environment\"}[1h]))"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "Hour-over-hour change",
+      "gridPos": { "h": 8, "w": 14, "x": 0, "y": 10 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "interval": "1h",
+      "fieldConfig": { "defaults": { "unit": "m", "custom": { "drawStyle": "line", "lineWidth": 1, "fillOpacity": 10 } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": [] }, "tooltip": { "mode": "multi" } },
+      "targets": [
+        {
+          "refId": "A",
+          "interval": "1h",
+          "legendFormat": "{{launchdarkly_project_name}} / {{launchdarkly_environment_key}}",
+          "expr": "sum by (launchdarkly_project_name, launchdarkly_environment_key) (last_over_time(launchdarkly_service_connections_minutes{launchdarkly_project_name=~\"$project\", launchdarkly_environment_key=~\"$environment\"}[1h])) - sum by (launchdarkly_project_name, launchdarkly_environment_key) (last_over_time(launchdarkly_service_connections_minutes{launchdarkly_project_name=~\"$project\", launchdarkly_environment_key=~\"$environment\"}[1h] offset 1h))"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "bargauge",
+      "title": "Total minutes in range",
+      "gridPos": { "h": 8, "w": 10, "x": 14, "y": 10 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "m", "color": { "mode": "continuous-GrYlRd" } }, "overrides": [] },
+      "options": { "orientation": "horizontal", "displayMode": "gradient", "reduceOptions": { "calcs": ["lastNotNull"], "values": false } },
+      "targets": [
+        {
+          "refId": "A",
+          "instant": true,
+          "legendFormat": "{{launchdarkly_project_name}} / {{launchdarkly_environment_key}}",
+          "expr": "sort_desc(sum by (launchdarkly_project_name, launchdarkly_environment_key) (sum_over_time(launchdarkly_service_connections_minutes{launchdarkly_project_name=~\"$project\", launchdarkly_environment_key=~\"$environment\"}[$__range])))"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Latest ingested usage hour",
+      "description": "Start of the newest usage hour published by the ingestion service.",
+      "gridPos": { "h": 4, "w": 8, "x": 0, "y": 18 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "dateTimeAsIso" }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "values": false }, "textMode": "value" },
+      "targets": [
+        { "refId": "A", "instant": true, "expr": "max({__name__=~\"launchdarkly_usage_ingest_last_hour.*\"}) * 1000" }
+      ]
+    },
+    {
+      "id": 5,
+      "type": "stat",
+      "title": "Ingestion lag",
+      "gridPos": { "h": 4, "w": 8, "x": 8, "y": 18 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null }, { "color": "orange", "value": 10800 }, { "color": "red", "value": 21600 } ] }
+        },
+        "overrides": []
+      },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "values": false }, "colorMode": "value" },
+      "targets": [
+        { "refId": "A", "instant": true, "expr": "time() - max({__name__=~\"launchdarkly_usage_ingest_last_hour.*\"})" }
+      ]
+    },
+    {
+      "id": 6,
+      "type": "stat",
+      "title": "Failed ingestion runs (range)",
+      "gridPos": { "h": 4, "w": 8, "x": 16, "y": 18 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": { "unit": "none", "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null }, { "color": "red", "value": 1 } ] } },
+        "overrides": []
+      },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "values": false }, "colorMode": "value" },
+      "targets": [
+        { "refId": "A", "instant": true, "expr": "sum(increase({__name__=~\"launchdarkly_usage_ingest_failures.*\"}[$__range])) or vector(0)" }
+      ]
+    }
+  ]
+}
